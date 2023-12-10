@@ -1,18 +1,19 @@
 from merfNet import MerfNet
 import torch
-from gaussian_splatting.scene import Scene
+from scene import Scene
 import os
 from tqdm import tqdm
 from os import makedirs
-from gaussian_splatting.gaussian_renderer import render
+from gaussian_renderer import render
 import torchvision
-from gaussian_splatting.utils.general_utils import safe_state
+from utils.general_utils import safe_state
 from argparse import ArgumentParser
-from gaussian_splatting.arguments import ModelParams, PipelineParams, get_combined_args
-from gaussian_splatting.gaussian_renderer import GaussianModel
+from arguments import ModelParams, PipelineParams, get_combined_args
+from gaussian_renderer import GaussianModel
+from resmem.model import ResMem
 
 
-def train_merf(dataset: ModelParams, iteration: int, pipeline: PipelineParams):
+def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
     makedirs("merf_outputs", exist_ok=True)
     with torch.no_grad():
         gaussians = GaussianModel(dataset.sh_degree)
@@ -32,8 +33,9 @@ def train_merf(dataset: ModelParams, iteration: int, pipeline: PipelineParams):
         rendering = render(viewpoint_camera, gaussians, pipeline, background)["render"]
         return rendering
 
-    merf = MerfNet(gaussians, render_merf, single_camera[0])
-    optimizer = torch.optim.AdamW(merf.parameters(), lr=0.09)
+    merf_eval_model = ResMem(pretrained=True)
+    merf = MerfNet(gaussians, render_merf, single_camera[0], merf_eval_model)
+    optimizer = torch.optim.AdamW(merf.parameters(), lr=10)
     mse = torch.nn.MSELoss()
 
     loop = tqdm(range(1000))
