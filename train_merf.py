@@ -37,15 +37,12 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     merf = MerfNet(gaussians, render_merf, single_camera[0], merf_eval_model)
 
     optimizer = torch.optim.AdamW(merf.parameters(), lr=0.01)
-    mse = torch.nn.MSELoss()
 
     prev_loss = 0
     loop = tqdm(range(1000))
     for i in loop:
-        print(merf.camera_pos.is_leaf)
         optimizer.zero_grad()
-        rendering, prediction = merf()
-        loss = mse(prediction, torch.ones(1, 1).to(merf.device))
+        loss, rendering, prediction = merf()
         if loss != prev_loss and i != 0:
             print("Loss:", loss)
             print("Prev Loss:", prev_loss)
@@ -60,7 +57,6 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
             print("after update")
             print(merf.camera_pos)
             print("loss.grad:", loss.grad)
-        merf.update_camera()
         prev_loss = loss.item()
 
         if i % 100 == 0:
