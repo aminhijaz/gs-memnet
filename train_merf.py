@@ -73,7 +73,6 @@ if __name__ == "__main__":
     parser.add_argument("--iteration", default=-1, type=int)
     parser.add_argument("--quiet", action="store_true")
     args = get_combined_args(parser)
-    print("Rendering " + args.model_path)
 
     # Initialize system state (RNG)
     safe_state(args.quiet)
