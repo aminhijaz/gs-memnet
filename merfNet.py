@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torchvision
 from torchvision import transforms
 
-from gaussian_splatting.scene.cameras import Camera as GSCamera
+from gaussian-splatting.scene.cameras import Camera as GSCamera
 
 
 class MerfNet(nn.Module):
