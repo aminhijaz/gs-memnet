@@ -8,8 +8,8 @@ from scene.cameras import Camera as GSCamera
 
 
 class MerfNet(nn.Module):
-    def __init__(self, gaussians, renderer, camera, resmodel, device="cuda"):
-        super(MerfNet, self).__init__()
+    def __init__(self, gaussians, renderer, camera, resmodel, loss_fn=torch.nn.MSELoss(), device="cuda"):
+        super().__init__()
         self.device = device
         self.gaussians = gaussians
         self.renderer = renderer
@@ -24,26 +24,26 @@ class MerfNet(nn.Module):
         for param in self.resmodel.parameters():
             param.requires_grad = False
         self.resmodel.eval()
+        self.loss_fn = loss_fn
 
     def forward(self):
+        self.update_camera()
         image = self.renderer(self.camera, self.gaussians)
-        # print(image.shape)
         i = image
         # i = image[0, :, :, :3]
         # i = i.permute(2, 0, 1)
         i = self.transform(i.unsqueeze(0))
-        # print(i.shape)
         prediction = self.resmodel.forward(i.to(self.device))
-        # print(prediction.item())
+        loss = self.loss_fn(prediction, torch.ones(1, 1).to(self.device))
 
-        return image, prediction
+        return loss, image, prediction
 
     def update_camera(self):
-        old_camera_pos = self.camera_pos.clone().detach().to(self.device)
-        new_R = look_at_rotation(old_camera_pos[None, :], device=self.device)
-        new_T = -torch.bmm(new_R.transpose(1, 2), old_camera_pos[None, :, None])[:, :, 0]
-        new_R = new_R.squeeze(0).cpu().numpy()
-        new_T = new_T.cpu().numpy()
+        R = look_at_rotation(self.camera_pos[None, :], device=self.device)
+        T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
+        R = R.squeeze(0)
+        new_R = R.clone().detach().cpu().numpy()
+        new_T = T.clone().detach().cpu().numpy()
         prev_camera = self.camera
         new_camera = GSCamera(
             prev_camera.colmap_id, new_R, new_T,
