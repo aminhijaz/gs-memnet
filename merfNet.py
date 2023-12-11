@@ -17,24 +17,9 @@ class MerfNet(nn.Module):
             transforms.Resize((256, 256)),
             # transforms.CenterCrop(227),
         ))
-        camR = camera.R
-        camT = camera.T
-        # randomize the camera rotation and translation
-        print("Camera R and T")
-        print(camR)
-        print(camT)
-        camR = np.random.rand(3, 3)
-        camT = np.random.rand(3)
-        print("Randomized Camera R and T")
-        print(camR)
-        print(camT)
         self.camera = camera
-        # position and lookat from R and T ?
-        # optimize the camera pos and camera lookat
-        self.camera_R = nn.Parameter(torch.from_numpy(camR)).to(device)
-        self.camera_T = nn.Parameter(torch.from_numpy(camT)).to(device)
-        # update the camera with the new R and T
-        self.update_camera()
+        # optimize the camera translation
+        self.camera_pos = nn.Parameter(torch.from_numpy(np.array(camera.T, dtype=np.float32)).to(device))
         self.resmodel = resmodel.to(device)
         for param in self.resmodel.parameters():
             param.requires_grad = False
@@ -47,46 +32,93 @@ class MerfNet(nn.Module):
         # i = image[0, :, :, :3]
         # i = i.permute(2, 0, 1)
         i = self.transform(i.unsqueeze(0))
-        print(i.shape)
+        # print(i.shape)
         prediction = self.resmodel.forward(i.to(self.device))
-        print(prediction.item())
+        # print(prediction.item())
 
         return image, prediction
 
     def update_camera(self):
-        # R = look_at_rotation(self.camera_pos[None, :], self.camera_lookat[None, :], device=self.device)
-        # T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
-        print(self.camera_R)
-        print(self.camera_T)
-        with torch.no_grad():
-            new_R = self.camera_R.cpu().numpy()
-            new_T = self.camera_T.cpu().numpy()
-            print(new_T)
-            prev_camera = self.camera
-            new_camera = GSCamera(
-                prev_camera.colmap_id, new_R, new_T,
-                prev_camera.FoVx, prev_camera.FoVy,
-                prev_camera.original_image, None,
-                prev_camera.image_name, prev_camera.uid
-            )
-            self.camera = new_camera
+        old_camera_pos = self.camera_pos.clone().detach().to(self.device)
+        new_R = look_at_rotation(old_camera_pos[None, :], device=self.device)
+        new_T = -torch.bmm(new_R.transpose(1, 2), old_camera_pos[None, :, None])[:, :, 0]
+        new_R = new_R.squeeze(0).cpu().numpy()
+        new_T = new_T.cpu().numpy()
+        prev_camera = self.camera
+        new_camera = GSCamera(
+            prev_camera.colmap_id, new_R, new_T,
+            prev_camera.FoVx, prev_camera.FoVy,
+            prev_camera.original_image, None,
+            prev_camera.image_name, prev_camera.uid
+        )
+        self.camera = new_camera
 
 
-# def look_at_rotation(camera_position, at, up=torch.from_numpy(np.array([0, 1, 0])), device="cuda"):
-#     up = up.to(device)
-#     for t, n in zip([camera_position, at, up], ["camera_position", "at", "up"]):
-#         if t.shape[-1] != 3:
-#             msg = "Expected arg %s to have shape (N, 3); got %r"
-#             raise ValueError(msg % (n, t.shape))
-#     z_axis = F.normalize(at - camera_position, eps=1e-5)
-#     x_axis = F.normalize(torch.cross(up, z_axis, dim=1), eps=1e-5)
-#     y_axis = F.normalize(torch.cross(z_axis, x_axis, dim=1), eps=1e-5)
-#     is_close = torch.isclose(x_axis, torch.tensor(0.0), atol=5e-3).all(
-#         dim=1, keepdim=True
-#     )
-#     if is_close.any():
-#         replacement = F.normalize(torch.cross(y_axis, z_axis, dim=1), eps=1e-5)
-#         x_axis = torch.where(is_close, replacement, x_axis)
-#     R = torch.cat((x_axis[:, None, :], y_axis[:, None, :], z_axis[:, None, :]), dim=1)
+def look_at_rotation(
+    camera_position, 
+    at=((0, 0, 0),), 
+    up=((0, 1, 0),),
+    device="cuda"):
+
+    broadcasted_args = convert_to_tensors_and_broadcast(
+        camera_position, at, up, device=device
+    )
+    camera_position, at, up = broadcasted_args
+
+    for t, n in zip([camera_position, at, up], ["camera_position", "at", "up"]):
+        if t.shape[-1] != 3:
+            msg = "Expected arg %s to have shape (N, 3); got %r"
+            raise ValueError(msg % (n, t.shape))
+    z_axis = F.normalize(at - camera_position, eps=1e-5)
+    x_axis = F.normalize(torch.cross(up, z_axis, dim=1), eps=1e-5)
+    y_axis = F.normalize(torch.cross(z_axis, x_axis, dim=1), eps=1e-5)
+    is_close = torch.isclose(x_axis, torch.tensor(0.0), atol=5e-3).all(
+        dim=1, keepdim=True
+    )
+    if is_close.any():
+        replacement = F.normalize(torch.cross(y_axis, z_axis, dim=1), eps=1e-5)
+        x_axis = torch.where(is_close, replacement, x_axis)
+    R = torch.cat((x_axis[:, None, :], y_axis[:, None, :], z_axis[:, None, :]), dim=1)
     
-#     return R.transpose(1, 2)
+    return R.transpose(1, 2)
+
+def convert_to_tensors_and_broadcast(
+    *args,
+    dtype = torch.float32,
+    device = "cpu",
+):
+    # Convert all inputs to tensors with a batch dimension
+    args_1d = [format_tensor(c, dtype, device) for c in args]
+
+    # Find broadcast size
+    sizes = [c.shape[0] for c in args_1d]
+    N = max(sizes)
+
+    args_Nd = []
+    for c in args_1d:
+        if c.shape[0] != 1 and c.shape[0] != N:
+            msg = "Got non-broadcastable sizes %r" % sizes
+            raise ValueError(msg)
+
+        # Expand broadcast dim and keep non broadcast dims the same size
+        expand_sizes = (N,) + (-1,) * len(c.shape[1:])
+        args_Nd.append(c.expand(*expand_sizes))
+
+    return args_Nd
+
+def format_tensor(
+    input,
+    dtype = torch.float32,
+    device = "cpu",
+) -> torch.Tensor:
+    if not torch.is_tensor(input):
+        input = torch.tensor(input, dtype=dtype, device=device)
+
+    if input.dim() == 0:
+        input = input.view(1)
+
+    if input.device == device:
+        return input
+
+    input = input.to(device=device)
+    return input
