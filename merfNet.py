@@ -105,10 +105,6 @@ class MerfNet(nn.Module):
             scales = scales,
             rotations = rotations,
             cov3D_precomp = cov3D_precomp)
-        print(self.camera_pos.requires_grad)
-        print(R)
-
-        
         i = rendered_image
         # i = image[0, :, :, :3]
         # i = i.permute(2, 0, 1)
