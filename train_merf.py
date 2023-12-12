@@ -44,26 +44,14 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     for i in loop:
         optimizer.zero_grad()
         loss, _ = merf()
-        if loss != prev_loss and i != 0:
-            print("Loss:", loss)
-            print("Prev Loss:", prev_loss)
-            print("Prediction:", prediction)
-        if i % 100 == 0:
-            print("before update")
-            print(merf.camera_pos)
-            print("loss.grad:", loss.grad)
         loss.backward(retain_graph=True)
+        print(loss)
         optimizer.step()
-        if i % 100 == 0:
-            print("after update")
-            print(merf.camera_pos)
-            print("loss.grad:", loss.grad)
-        prev_loss = loss.item()
 
-        if i % 100 == 0:
-            for g in optimizer.param_groups:
-                g['lr'] += 0.02
-            torchvision.utils.save_image(rendering, os.path.join("merf_outputs", '{0:05d}'.format(i) + ".png"))
+        # if i % 100 == 0:
+        #     for g in optimizer.param_groups:
+        #         g['lr'] += 0.02
+        #     torchvision.utils.save_image(rendering, os.path.join("merf_outputs", '{0:05d}'.format(i) + ".png"))
 
 
 if __name__ == "__main__":
