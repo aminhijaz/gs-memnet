@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torchvision
 from torchvision import transforms
 from scene.cameras import Camera as GSCamera
-from diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianRasterizer,_RasterizeGaussians
+from diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianRasterizer,
 from resmem import ResMem
 import math
 class MerfNet(nn.Module):
@@ -69,6 +69,7 @@ class MerfNet(nn.Module):
         Rt[:3, :3] = R.transpose(0,1)
         Rt[:3, 3] = T
         Rt[3, 3] = 1.0
+
         pc = self.gaussians
         self.raster_settings = GaussianRasterizationSettings(
         image_height=int(self.camera.image_height),
@@ -77,7 +78,7 @@ class MerfNet(nn.Module):
         tanfovy=tanfovy,
         bg=self.background,
         scale_modifier=1.0,
-        viewmatrix=Rt,
+        viewmatrix=T,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
         campos=self.camera_pos,
@@ -90,14 +91,37 @@ class MerfNet(nn.Module):
             screenspace_points.retain_grad()
         except:
             pass
+
         means3D = pc.get_xyz
         means2D = screenspace_points
         opacity = pc.get_opacity
+
+    # If precomputed 3d covariance is provided, use it. If not, then it will be computed from
+    # scaling / rotation by the rasterizer.
+        scales = None
+        rotations = None
+        cov3D_precomp = None
+        if self.pipeline.compute_cov3D_python:
+            cov3D_precomp = self.gaussians.get_covariance(3)
+        else:
+            scales = self.gaussians.get_scaling
+            rotations = self.gaussians.get_rotation
+
+    # If precomputed colors are provided, use them. Otherwise, if it is desired to precompute colors
+    # from SHs in Python, do it. If not, then SH -> RGB conversion will be done by rasterizer.
+        shs = None
+        colors_precomp = None
+        shs = self.gaussians.get_features
+
         rendered_image, _ = self.rasterizer(
             means3D = means3D,
             means2D = means2D,
+            shs = shs,
+            colors_precomp = colors_precomp,
             opacities = opacity,
-            )
+            scales = scales,
+            rotations = rotations,
+            cov3D_precomp = cov3D_precomp)
         i = rendered_image
         # i = image[0, :, :, :3]
         # i = i.permute(2, 0, 1)
