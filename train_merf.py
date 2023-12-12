@@ -43,8 +43,8 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     for i in loop:
         optimizer.zero_grad()
         loss, rendered_image = merf()
-        print(rendered_image.require_grads)
-        print(rendered_image.require_grads)
+        print(rendered_image.requires_grad)
+        print(loss.requires_grad)
         loss.backward(retain_graph=True)
         optimizer.step()
 
