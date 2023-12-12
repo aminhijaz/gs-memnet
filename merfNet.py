@@ -32,21 +32,7 @@ class MerfNet(nn.Module):
         self.loss_fn = loss_fn
         tanfovx = math.tan(self.camera.FoVx * 0.5)
         tanfovy = math.tan(self.camera.FoVy * 0.5)
-        self.raster_settings = GaussianRasterizationSettings(
-        image_height=int(self.camera.image_height),
-        image_width=int(self.camera.image_width),
-        tanfovx=tanfovx,
-        tanfovy=tanfovy,
-        bg=self.background,
-        scale_modifier=1.0,
-        viewmatrix=self.camera.world_view_transform,
-        projmatrix=self.camera.full_proj_transform,
-        sh_degree=self.gaussians.active_sh_degree,
-        campos=self.camera_pos,
-        prefiltered=False,
-        debug=self.pipeline.debug
-    )
-        self.rasterizer = GaussianRasterizer(raster_settings=self.raster_settings)
+        self.rasterizer = GaussianRasterizer()
         self.rasterizer.eval()
         for param in self.rasterizer.parameters():
             param.requires_grad = False
