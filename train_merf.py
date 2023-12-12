@@ -4,7 +4,7 @@ from scene import Scene
 import os
 from tqdm import tqdm
 from os import makedirs
-from gaussian_renderer import render
+from gaussian_renderer import render, render_RT
 import torchvision
 from utils.general_utils import safe_state
 from argparse import ArgumentParser
@@ -29,8 +29,9 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
         bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
 
-    def render_merf(viewpoint_camera, gaussians):
-        rendering = render(viewpoint_camera, gaussians, pipeline, background)["render"]
+    def render_merf(R, T, viewpoint_camera, gaussians):
+      
+        rendering = render_RT(R,T,viewpoint_camera, gaussians, pipeline, background)["render"]
         return rendering
 
     merf_eval_model = ResMem(pretrained=True)
