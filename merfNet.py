@@ -95,7 +95,6 @@ class MerfNet(nn.Module):
         shs = None
         colors_precomp = None
         shs = self.gaussians.get_features
-
         rendered_image, _ = self.rasterizer(
             means3D = means3D,
             means2D = means2D,
@@ -105,13 +104,10 @@ class MerfNet(nn.Module):
             scales = scales,
             rotations = rotations,
             cov3D_precomp = cov3D_precomp)
-        i = rendered_image
-        # i = image[0, :, :, :3]
-        # i = i.permute(2, 0, 1)
-        i = self.transform(i.unsqueeze(0))
+        i = self.transform(rendered_image.unsqueeze(0))
         prediction = self.resmodel.forward(i)
-        loss = self.loss_fn(prediction, torch.ones(1, 1).to(self.device))
-        return loss, rendered_image
+        loss = self.loss_fn(prediction, torch.ones(1, 1, dtype=torch.float32).to(self.device))
+        return loss, prediction
 
 def look_at_rotation(
     camera_position, at=((0, 0, 0),), up=((0, 1, 0),), device = "cpu"
