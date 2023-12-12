@@ -57,19 +57,20 @@ class MerfNet(nn.Module):
 
 
     def forward(self):
-        # R = look_at_rotation(self.camera_pos[None, :], device=self.device)
-        # T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
-        # R = R.squeeze(0)
         tanfovx = math.tan(self.camera.FoVx * 0.5)
         tanfovy = math.tan(self.camera.FoVy * 0.5)
         R = look_at_rotation(self.camera_pos[None, :], device=self.device)
         T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
         R = R.squeeze(0)
-        Rt = torch.zeros(4,4, device="cuda")
-        Rt[:3, :3] = R.transpose(0,1)
-        Rt[:3, 3] = T
-        Rt[3, 3] = 1.0
-
+        Rt_top_left = R.transpose(0, 1)
+        # Create the top-right 3x1 block of Rt
+        Rt_top_right = T.unsqueeze(1)  # Add an extra dimension to T to make it 3x1
+        # Create the bottom row of Rt
+        Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device="cuda")
+        # Concatenate to form the full 4x4 Rt matrix
+        Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
+        # Now set requires_grad to True
+        Rt.requires_grad = True
         pc = self.gaussians
         self.raster_settings = GaussianRasterizationSettings(
         image_height=int(self.camera.image_height),
