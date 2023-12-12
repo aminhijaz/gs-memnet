@@ -45,6 +45,7 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
         optimizer.zero_grad()
         loss, _ = merf()
         loss.backward(retain_graph=True)
+        print(merf.Rt.grad)
         optimizer.step()
 
         # if i % 100 == 0:

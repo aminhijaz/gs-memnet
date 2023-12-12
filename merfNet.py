@@ -12,6 +12,7 @@ class MerfNet(nn.Module):
     def __init__(self, gaussians, renderer, camera, resmodel, pipeline, background, loss_fn=torch.nn.MSELoss(), device="cuda"):
         super().__init__()
         self.device = device
+        self.Rt = None
         self.gaussians = gaussians
         self.renderer = renderer
         self.transform = transforms.Compose((
@@ -62,19 +63,11 @@ class MerfNet(nn.Module):
         T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
         R = R.squeeze(0)
         Rt_top_left = R.transpose(0, 1)
-        print("Rt_top_left")
-        print(Rt_top_left.grad_fn)
-        print("Rt_bottom")
         Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device=self.device, dtype=torch.float32)
-        print(Rt_bottom.grad_fn)
-        print("Rt_top_right")
         Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
-        print(Rt_top_right.grad_fn)
         Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
-        print("Rt")
-
-        print(Rt.grad_fn)
         Rt.retain_grad()
+        self.Rt = Rt
         # Now set requires_grad to True
         pc = self.gaussians
         self.raster_settings = GaussianRasterizationSettings(
@@ -129,13 +122,11 @@ class MerfNet(nn.Module):
             rotations = rotations,
             cov3D_precomp = cov3D_precomp)
         i = rendered_image
-        print(rendered_image.grad_fn)
         # i = image[0, :, :, :3]
         # i = i.permute(2, 0, 1)
         i = self.transform(i.unsqueeze(0))
         prediction = self.resmodel.forward(i)
         loss = self.loss_fn(prediction, torch.ones(1, 1).to(self.device))
-        print(loss.grad_fn)
         return loss, rendered_image
 
 def look_at_rotation(
