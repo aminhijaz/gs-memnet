@@ -30,9 +30,7 @@ class MerfNet(nn.Module):
             param.requires_grad = False
         self.resmodel.eval()
         self.loss_fn = loss_fn
-        tanfovx = math.tan(self.camera.FoVx * 0.5)
-        tanfovy = math.tan(self.camera.FoVy * 0.5)
-        self.rasterizer = GaussianRasterizer()
+        self.rasterizer = GaussianRasterizer(raster_settings=None)
         self.rasterizer.eval()
         for param in self.rasterizer.parameters():
             param.requires_grad = False
