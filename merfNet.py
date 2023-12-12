@@ -77,7 +77,7 @@ class MerfNet(nn.Module):
         tanfovy=tanfovy,
         bg=self.background,
         scale_modifier=1.0,
-        viewmatrix=T,
+        viewmatrix=Rt,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
         campos=self.camera_pos,
