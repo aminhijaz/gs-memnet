@@ -43,7 +43,7 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     loop = tqdm(range(1000))
     for i in loop:
         optimizer.zero_grad()
-        loss, rendering, prediction = merf()
+        loss, _,_ = merf()
         if loss != prev_loss and i != 0:
             print("Loss:", loss)
             print("Prev Loss:", prev_loss)
