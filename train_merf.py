@@ -42,10 +42,9 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     loop = range(1000)
     for i in loop:
         optimizer.zero_grad()
-        loss, rendered_image = merf()
-        print(rendered_image.requires_grad)
-        print(loss.requires_grad)
+        loss, _ = merf()
         loss.backward(retain_graph=True)
+        print(merf.camera_pos.grad)
         optimizer.step()
 
         # if i % 100 == 0:
