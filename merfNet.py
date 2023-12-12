@@ -65,7 +65,7 @@ class MerfNet(nn.Module):
         Rt_top_left = R.transpose(0, 1)
         Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device="cuda")
         Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
-        Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0, dtype=torch.float32)
+        Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
         
         # Now set requires_grad to True
         pc = self.gaussians
@@ -121,11 +121,13 @@ class MerfNet(nn.Module):
             rotations = rotations,
             cov3D_precomp = cov3D_precomp)
         i = rendered_image
+        print(rendered_image.grad_fn)
         # i = image[0, :, :, :3]
         # i = i.permute(2, 0, 1)
         i = self.transform(i.unsqueeze(0))
         prediction = self.resmodel.forward(i)
         loss = self.loss_fn(prediction, torch.ones(1, 1).to(self.device))
+        print(loss.grad_fn)
         return loss, rendered_image
 
 def look_at_rotation(
