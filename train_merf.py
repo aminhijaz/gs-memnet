@@ -35,7 +35,7 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
         return rendering
 
     merf_eval_model = ResMem(pretrained=True)
-    merf = MerfNet(gaussians, render_merf, single_camera[0], merf_eval_model)
+    merf = MerfNet(gaussians, render_merf, single_camera[0], merf_eval_model, pipeline, background)
 
     optimizer = torch.optim.AdamW(merf.parameters(), lr=0.01)
 
