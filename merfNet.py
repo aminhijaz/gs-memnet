@@ -60,13 +60,13 @@ class MerfNet(nn.Module):
         tanfovx = math.tan(self.camera.FoVx * 0.5)
         tanfovy = math.tan(self.camera.FoVy * 0.5)
         R = look_at_rotation(self.camera_pos[None, :], device=self.device)
-        print(self.camera_position.grad)
+        print(self.camera_pos.grad)
         T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
-        print(self.camera_position.grad)
+        print(self.camera_pos.grad)
         R = R.squeeze(0)
-        print(self.camera_position.grad)
+        print(self.camera_pos.grad)
         Rt_top_left = R.transpose(0, 1)
-        print(self.camera_position.grad)
+        print(self.camera_pos.grad)
 
         Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device=self.device, dtype=torch.float32)
         Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
