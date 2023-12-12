@@ -39,12 +39,12 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     merf.train()
 
     optimizer = torch.optim.Adam([merf.camera_pos], lr=0.1)
-    prev_loss = 0
     loop = range(1000)
     for i in loop:
         optimizer.zero_grad()
         loss, _ = merf()
         loss.backward(retain_graph=True)
+        print(merf.camera_pos.grad)
         optimizer.step()
 
         # if i % 100 == 0:
