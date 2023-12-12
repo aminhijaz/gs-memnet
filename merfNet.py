@@ -43,7 +43,7 @@ class MerfNet(nn.Module):
     def forward(self):
         tanfovx = math.tan(self.camera.FoVx * 0.5)
         tanfovy = math.tan(self.camera.FoVy * 0.5)
-        R = look_at_rotation(self.camera_pos[None, :], device=self.device)
+        # R = look_at_rotation(self.camera_pos[None, :], device=self.device)
         # T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
         # R = R.squeeze(0)
         # Rt_top_left = R.transpose(0, 1)
@@ -61,7 +61,7 @@ class MerfNet(nn.Module):
         tanfovy=tanfovy,
         bg=self.background,
         scale_modifier=1.0,
-        viewmatrix=R,
+        viewmatrix=self.camera.world_view_transform,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
         campos=self.camera_pos,
