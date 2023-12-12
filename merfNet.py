@@ -64,12 +64,13 @@ class MerfNet(nn.Module):
         R = R.squeeze(0)
         Rt_top_left = R.transpose(0, 1)
         # Create the top-right 3x1 block of Rt
-        Rt_top_right = T.unsqueeze(1)  # Add an extra dimension to T to make it 3x1
-        # Create the bottom row of Rt
-        Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device="cuda")
-        # Concatenate to form the full 4x4 Rt matrix
+        # Assuming Rt_top_left is [3, 3] and R and T are computed correctly
+        Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
+
+        # Assuming Rt_bottom is [1, 4]
         Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
-        # Now set requires_grad to True
+
+        # Set requires_grad to True
         Rt.requires_grad = True
         pc = self.gaussians
         self.raster_settings = GaussianRasterizationSettings(
