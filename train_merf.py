@@ -43,8 +43,8 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     for i in loop:
         optimizer.zero_grad()
         loss, _ = merf()
+        return
         loss.backward(retain_graph=True)
-        print(merf.camera_pos.grad)
         optimizer.step()
 
         # if i % 100 == 0:
