@@ -22,7 +22,6 @@ class MerfNet(nn.Module):
         self.background = background
         self.pipeline = pipeline
         # optimize the camera translation
-        print(self.camera.camera_center)
         self.camera_pos = nn.Parameter(
             torch.from_numpy(np.array([3.0,  6.9, +2.5], dtype=np.float32)).to(device))
         self.resmodel = resmodel.to(device)
@@ -63,12 +62,17 @@ class MerfNet(nn.Module):
         T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
         R = R.squeeze(0)
         Rt_top_left = R.transpose(0, 1)
+        print("Rt_top_left")
         print(Rt_top_left.grad_fn)
+        print("Rt_bottom")
         Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device=self.device, dtype=torch.float32)
         print(Rt_bottom.grad_fn)
+        print("Rt_top_right")
         Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
         print(Rt_top_right.grad_fn)
         Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
+        print("Rt")
+
         print(Rt.grad_fn)
         Rt.retain_grad()
         # Now set requires_grad to True
@@ -87,7 +91,6 @@ class MerfNet(nn.Module):
         prefiltered=False,
         debug=self.pipeline.debug
     )
-        print(Rt.grad_fn)
         self.rasterizer.raster_settings = self.raster_settings
         screenspace_points = torch.zeros_like(pc.get_xyz, dtype=pc.get_xyz.dtype, requires_grad=True, device="cuda") + 0
         try:
