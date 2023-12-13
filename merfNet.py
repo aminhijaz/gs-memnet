@@ -62,7 +62,7 @@ class MerfNet(nn.Module):
         viewmatrix=Rt,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
-        campos=self.camera.world_view_transform,
+        campos=self.camera_center,
         prefiltered=False,
         debug=self.pipeline.debug
     )
@@ -102,7 +102,7 @@ class MerfNet(nn.Module):
             scales = scales,
             rotations = rotations,
             cov3D_precomp = cov3D_precomp,
-            view_matrix = Rt)
+            )
         i = self.transform(rendered_image.unsqueeze(0))
         prediction = self.resmodel.forward(i)
         loss = self.loss_fn(prediction, torch.ones(1, 1, dtype=torch.float32).to(self.device))
