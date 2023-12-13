@@ -58,7 +58,8 @@ class _RasterizeGaussians(torch.autograd.Function):
         view_matrix,
         raster_settings,
     ):
-        print("reached")
+        print(view_matrix.requires_grad)
+        print(view_matrix.requires_grad)
         # Restructure arguments the way that the C++ lib expects them
         args = (
             raster_settings.bg, 
