@@ -60,6 +60,8 @@ class _RasterizeGaussians(torch.autograd.Function):
     ):
         print(view_matrix.requires_grad)
         print(view_matrix.requires_grad)
+        print(view_matrix.requires_grad)
+
         # Restructure arguments the way that the C++ lib expects them
         args = (
             raster_settings.bg, 
@@ -108,6 +110,7 @@ class _RasterizeGaussians(torch.autograd.Function):
         num_rendered = ctx.num_rendered
         raster_settings = ctx.raster_settings
         colors_precomp, means3D, scales, rotations, cov3Ds_precomp, radii, sh, geomBuffer, binningBuffer, imgBuffer, alpha, view_matrix = ctx.saved_tensors
+        print(view_matrix.requires_grad)
 
         # Restructure args as C++ method expects them
         args = (raster_settings.bg,
