@@ -150,7 +150,8 @@ __global__ void computeCov2DCUDA(int P,
 	const float* view_matrix,
 	const float* dL_dconics,
 	float3* dL_dmeans,
-	float* dL_dcov)
+	float* dL_dcov,
+	float* dL_view)
 {
 	auto idx = cg::this_grid().thread_rank();
 	if (idx >= P || !(radii[idx] > 0))
@@ -225,21 +226,32 @@ __global__ void computeCov2DCUDA(int P,
 		dL_dcov[6 * idx + 1] = 2 * T[0][0] * T[0][1] * dL_da + (T[0][0] * T[1][1] + T[0][1] * T[1][0]) * dL_db + 2 * T[1][0] * T[1][1] * dL_dc;
 		dL_dcov[6 * idx + 2] = 2 * T[0][0] * T[0][2] * dL_da + (T[0][0] * T[1][2] + T[0][2] * T[1][0]) * dL_db + 2 * T[1][0] * T[1][2] * dL_dc;
 		dL_dcov[6 * idx + 4] = 2 * T[0][2] * T[0][1] * dL_da + (T[0][1] * T[1][2] + T[0][2] * T[1][1]) * dL_db + 2 * T[1][1] * T[1][2] * dL_dc;
-		glm::mat3 dcov_dT = glm::transpose(Vrk) * T + glm::transpose(T) * glm::transpose(Vrk);
-		glm::mat3 mat_dL_dcov(
-        dL_dcov[0], dL_dcov[1], dL_dcov[2],
-        dL_dcov[3], dL_dcov[4], dL_dcov[5],
-        dL_dcov[6], dL_dcov[7], dL_dcov[8]
-    );
-		glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
-		glm::mat3 dT_dview = J;
-		glm::mat3 dL_dview = dL_dT * dT_dview;
 	}
 	else
 	{
 		for (int i = 0; i < 6; i++)
 			dL_dcov[6 * idx + i] = 0;
 	}
+	glm::mat3 dcov_dT = glm::transpose(Vrk) * T + glm::transpose(T) * glm::transpose(Vrk);
+	glm::mat3 mat_dL_dcov(
+        dL_dcov[0], dL_dcov[1], dL_dcov[2],
+        dL_dcov[3], dL_dcov[4], dL_dcov[5],
+        dL_dcov[6], dL_dcov[7], dL_dcov[8]
+    );
+
+	glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
+	glm::mat3 dT_dview = J;
+	glm::mat3 dL_dview = dL_dT * dT_dview;
+	dL_view[0] = dL_dview[0][0]
+	dL_view[1] = dL_dview[0][1]
+	dL_view[2] = dL_dview[0][2]
+	dL_view[3] = dL_dview[1][0]
+	dL_view[4] = dL_dview[1][1]
+	dL_view[5] = dL_dview[1][2]
+	dL_view[6] = dL_dview[2][0]
+	dL_view[7] = dL_dview[2][1]
+	dL_view[8] = dL_dview[2][2]
+
 
 	// Gradients of loss w.r.t. upper 2x3 portion of intermediate matrix T
 	// cov2D = transpose(T) * transpose(Vrk) * T;
@@ -632,7 +644,8 @@ void BACKWARD::preprocess(
 	float* dL_dcov3D,
 	float* dL_dsh,
 	glm::vec3* dL_dscale,
-	glm::vec4* dL_drot)
+	glm::vec4* dL_drot,
+	float* dL_view)
 {
 	// Propagate gradients for the path of 2D conic matrix computation. 
 	// Somewhat long, thus it is its own kernel rather than being part of 
@@ -650,7 +663,8 @@ void BACKWARD::preprocess(
 		viewmatrix,
 		dL_dconic,
 		(float3*)dL_dmean3D,
-		dL_dcov3D);
+		dL_dcov3D,
+		dL_view);
 
 	// Propagate gradients for remaining steps: finish 3D mean gradients,
 	// propagate color gradients to SH (if desireD), propagate 3D covariance
