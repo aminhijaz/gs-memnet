@@ -30,7 +30,6 @@ class MerfNet(nn.Module):
             param.requires_grad = False
         self.resmodel.eval()
         self.loss_fn = loss_fn
-        self.rasterizer = GaussianRasterizer(raster_settings=None)
         self.rasterizer.eval()
 
 
@@ -64,7 +63,7 @@ class MerfNet(nn.Module):
         prefiltered=False,
         debug=self.pipeline.debug
     )
-        self.rasterizer.raster_settings = self.raster_settings
+        self.rasterizer = GaussianRasterizer(raster_settings=self.raster_settings)
         screenspace_points = torch.zeros_like(pc.get_xyz, dtype=pc.get_xyz.dtype, requires_grad=True, device="cuda") + 0
         try:
             screenspace_points.retain_grad()
