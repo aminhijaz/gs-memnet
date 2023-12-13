@@ -63,9 +63,10 @@ namespace BACKWARD
 		float* dL_ddepth,
 		float* dL_dcov3D,
 		float* dL_dsh,
+		float* dL_view,
 		glm::vec3* dL_dscale,
 		glm::vec4* dL_drot,
-		float* dL_view);
+		);
 }
 
 #endif
