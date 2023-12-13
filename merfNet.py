@@ -62,7 +62,7 @@ class MerfNet(nn.Module):
         viewmatrix=Rt,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
-        campos=self.camera_pos.world_view_transform,
+        campos=self.camera.world_view_transform,
         prefiltered=False,
         debug=self.pipeline.debug
     )
