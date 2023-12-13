@@ -258,7 +258,6 @@ __global__ void computeCov2DCUDA(int P,
 	glm::mat3 dL_dview = dL_dT * dT_dview;
 	
 	dL_view[0] = dL_dview[0][0];
-	printf("%s %.3f", )
 	dL_view[1] = dL_dview[0][1];
 	dL_view[2] = dL_dview[0][2];
 	dL_view[3] = dL_dview[1][0];
