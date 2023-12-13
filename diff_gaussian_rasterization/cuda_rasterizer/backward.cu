@@ -249,14 +249,6 @@ __global__ void computeCov2DCUDA(int P,
         dL_dcov[6 * idx + 6], dL_dcov[6 * idx + 7], dL_dcov[6 * idx + 3]
     );
 
-	if(mat_dL_dcov[0][0] != 0) {
-		printf("%s %.3f", "mat_dL_dcov", mat_dL_dcov[0][0]);
-
-	}
-		if(mat_dL_dcov[0][1] != 0) {
-		printf("%s %.3f", "mat_dL_dcov", mat_dL_dcov[0][1]);
-
-	}
 
 
 	glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
