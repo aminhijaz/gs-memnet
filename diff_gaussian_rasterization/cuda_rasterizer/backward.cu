@@ -251,6 +251,14 @@ __global__ void computeCov2DCUDA(int P,
 	dL_view[6] = dL_dview[2][0];
 	dL_view[7] = dL_dview[2][1];
 	dL_view[8] = dL_dview[2][2];
+	dL_view[9] = 0
+	dL_view[10] = 0
+	dL_view[11] = 0
+	dL_view[12] = 0
+	dL_view[13] = 0
+	dL_view[14] = 0
+	dL_view[15] = 0
+
 
 
 	// Gradients of loss w.r.t. upper 2x3 portion of intermediate matrix T
