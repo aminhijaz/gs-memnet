@@ -38,6 +38,7 @@ def rasterize_gaussians(
         scales,
         rotations,
         cov3Ds_precomp,
+        raster_settings.view_matrix,
         raster_settings,
     )
 
@@ -53,6 +54,7 @@ class _RasterizeGaussians(torch.autograd.Function):
         scales,
         rotations,
         cov3Ds_precomp,
+        view_matrix,
         raster_settings,
     ):
         print("reached")
