@@ -27,9 +27,9 @@ def rasterize_gaussians(
     scales,
     rotations,
     cov3Ds_precomp,
+    view_matrix,
     raster_settings,
 ):
-    print(raster_settings.view_matrix.requires_grad)
     return _RasterizeGaussians.apply(
         means3D,
         means2D,
@@ -39,7 +39,7 @@ def rasterize_gaussians(
         scales,
         rotations,
         cov3Ds_precomp,
-        raster_settings.view_matrix,
+        view_matrix,
         raster_settings,
     )
 
@@ -194,7 +194,7 @@ class GaussianRasterizer(nn.Module):
             
         return visible
 
-    def forward(self, means3D, means2D, opacities, shs = None, colors_precomp = None, scales = None, rotations = None, cov3D_precomp = None):
+    def forward(self, means3D, means2D, opacities, view_matrix, shs = None, colors_precomp = None, scales = None, rotations = None, cov3D_precomp = None):
         
         raster_settings = self.raster_settings
 
@@ -226,6 +226,7 @@ class GaussianRasterizer(nn.Module):
             scales, 
             rotations,
             cov3D_precomp,
+            view_matrix,
             raster_settings, 
         )
 

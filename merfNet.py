@@ -57,7 +57,7 @@ class MerfNet(nn.Module):
         tanfovy=tanfovy,
         bg=self.background,
         scale_modifier=1.0,
-        viewmatrix=Rt,
+        viewmatrix=self.camere.world_view_transform,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
         campos=self.camera.camera_center,
@@ -94,12 +94,14 @@ class MerfNet(nn.Module):
         rendered_image, _, _, _ = self.rasterizer(
             means3D = means3D,
             means2D = means2D,
+            view_matrix= Rt,
             shs = shs,
             colors_precomp = colors_precomp,
             opacities = opacity,
             scales = scales,
             rotations = rotations,
             cov3D_precomp = cov3D_precomp,
+            
             )
         i = self.transform(rendered_image.unsqueeze(0))
         prediction = self.resmodel.forward(i)
