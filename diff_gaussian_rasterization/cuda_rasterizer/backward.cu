@@ -207,7 +207,7 @@ __global__ void computeCov2DCUDA(int P,
 
 	if (denom2inv != 0)
 	{
-		printf("%s", "reached")
+		printf("%s", "reached");
 		// Gradients of loss w.r.t. entries of 2D covariance matrix,
 		// given gradients of loss w.r.t. conic matrix (inverse covariance matrix).
 		// e.g., dL / da = dL / d_conic_a * d_conic_a / d_a
@@ -242,7 +242,14 @@ __global__ void computeCov2DCUDA(int P,
         dL_dcov[3], dL_dcov[4], dL_dcov[5],
         dL_dcov[6], dL_dcov[7], dL_dcov[8]
     );
-	printf("%.3f\n", dL_dcov[0]);
+	if(dL_dcov[0] != 0) {
+		printf("%.3f\n", dL_dcov[0]);
+	}
+	if(mat_dL_dcov[0] != 0) {
+		printf("%.3f\n", mat_dL_dcov[0]);
+	}
+
+
 
 	glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
 	glm::mat3 dT_dview = J;
