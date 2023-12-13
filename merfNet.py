@@ -43,15 +43,13 @@ class MerfNet(nn.Module):
     def forward(self):
         tanfovx = math.tan(self.camera.FoVx * 0.5)
         tanfovy = math.tan(self.camera.FoVy * 0.5)
-        # R = look_at_rotation(self.camera_pos[None, :], device=self.device)
-        # T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
-        # R = R.squeeze(0)
-        # Rt_top_left = R.transpose(0, 1)
-        # Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device=self.device, dtype=torch.float32)
-        # Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
-        # Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
-        # Rt.retain_grad()
-        # self.Rt = Rt
+        R = look_at_rotation(self.camera_pos[None, :], device=self.device)
+        T = -torch.bmm(R.transpose(1, 2), self.camera_pos[None, :, None])[:, :, 0]
+        R = R.squeeze(0)
+        Rt_top_left = R.transpose(0, 1)
+        Rt_bottom = torch.tensor([[0., 0., 0., 1.]], device=self.device, dtype=torch.float32)
+        Rt_top_right = T.view(3, 1)  # Reshape T to [3, 1] if it's not already
+        Rt = torch.cat([torch.cat([Rt_top_left, Rt_top_right], dim=1), Rt_bottom], dim=0)
         # Now set requires_grad to True
         pc = self.gaussians
         self.raster_settings = GaussianRasterizationSettings(
@@ -61,10 +59,10 @@ class MerfNet(nn.Module):
         tanfovy=tanfovy,
         bg=self.background,
         scale_modifier=1.0,
-        viewmatrix=self.camera.world_view_transform,
+        viewmatrix=Rt,
         projmatrix=self.camera.full_proj_transform,
         sh_degree=self.gaussians.active_sh_degree,
-        campos=self.camera_pos,
+        campos=self.camera_pos.world_view_transform,
         prefiltered=False,
         debug=self.pipeline.debug
     )
@@ -103,7 +101,8 @@ class MerfNet(nn.Module):
             opacities = opacity,
             scales = scales,
             rotations = rotations,
-            cov3D_precomp = cov3D_precomp)
+            cov3D_precomp = cov3D_precomp
+            viewMatrix = Rt)
         i = self.transform(rendered_image.unsqueeze(0))
         prediction = self.resmodel.forward(i)
         loss = self.loss_fn(prediction, torch.ones(1, 1, dtype=torch.float32).to(self.device))
