@@ -281,7 +281,7 @@ __global__ void computeCov2DCUDA(int P,
 	
 	dL_view[0] = dL_dview[0][0];
 	if(dL_dview[0][0] != 0) {
-		printf("%s %.3f", "dL_dview", dL_view[0]);
+		printf("%s %.3f", "dL_dview", dL_dview[0][0]);
 
 	}
 	if(dL_view[0] != 0) {
