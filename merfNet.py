@@ -101,7 +101,7 @@ class MerfNet(nn.Module):
             opacities = opacity,
             scales = scales,
             rotations = rotations,
-            cov3D_precomp = cov3D_precomp
+            cov3D_precomp = cov3D_precomp,
             viewMatrix = Rt)
         i = self.transform(rendered_image.unsqueeze(0))
         prediction = self.resmodel.forward(i)
