@@ -643,9 +643,9 @@ void BACKWARD::preprocess(
 	float* dL_ddepth,
 	float* dL_dcov3D,
 	float* dL_dsh,
-	float* dL_dview,
+	float* dL_view,
 	glm::vec3* dL_dscale,
-	glm::vec4* dL_drot,
+	glm::vec4* dL_drot
 	)
 {
 	// Propagate gradients for the path of 2D conic matrix computation. 
