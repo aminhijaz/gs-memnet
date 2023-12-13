@@ -242,6 +242,7 @@ __global__ void computeCov2DCUDA(int P,
 	glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
 	glm::mat3 dT_dview = J;
 	glm::mat3 dL_dview = dL_dT * dT_dview;
+	
 	dL_view[0] = dL_dview[0][0];
 	dL_view[1] = dL_dview[0][1];
 	dL_view[2] = dL_dview[0][2];
@@ -258,6 +259,12 @@ __global__ void computeCov2DCUDA(int P,
 	dL_view[13] = 0;
 	dL_view[14] = 0;
 	dL_view[15] = 0;
+	std::cout << dL_view[0] << std::endl;
+	std::cout << dL_view[1] << std::endl;
+	std::cout << dL_view[2] << std::endl;
+	std::cout << dL_view[3] << std::endl;
+
+
 
 
 
