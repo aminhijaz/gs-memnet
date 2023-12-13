@@ -220,7 +220,6 @@ __global__ void computeCov2DCUDA(int P,
 		dL_dcov[6 * idx + 0] = (T[0][0] * T[0][0] * dL_da + T[0][0] * T[1][0] * dL_db + T[1][0] * T[1][0] * dL_dc);
 		dL_dcov[6 * idx + 3] = (T[0][1] * T[0][1] * dL_da + T[0][1] * T[1][1] * dL_db + T[1][1] * T[1][1] * dL_dc);
 		dL_dcov[6 * idx + 5] = (T[0][2] * T[0][2] * dL_da + T[0][2] * T[1][2] * dL_db + T[1][2] * T[1][2] * dL_dc);
-
 		// Gradients of loss L w.r.t. each 3D covariance matrix (Vrk) entry, 
 		// given gradients w.r.t. 2D covariance matrix (off-diagonal).
 		// Off-diagonal elements appear twice --> double the gradient.
@@ -235,11 +234,10 @@ __global__ void computeCov2DCUDA(int P,
 			dL_dcov[6 * idx + i] = 0;
 	}
 	glm::mat3 dcov_dT = glm::transpose(Vrk) * T + glm::transpose(T) * glm::transpose(Vrk);
-
 	glm::mat3 mat_dL_dcov(
-        dL_dcov[0], dL_dcov[1], dL_dcov[2],
-        dL_dcov[3], dL_dcov[4], dL_dcov[5],
-        dL_dcov[6], dL_dcov[7], dL_dcov[8]
+        dL_dcov[6 * idx + 0], dL_dcov[6 * idx + 1], dL_dcov[6 * idx + 2],
+        dL_dcov[6 * idx + 3], dL_dcov[6 * idx + 4], dL_dcov[6 * idx + 5],
+        dL_dcov[6 * idx + 6], dL_dcov[6 * idx + 7], dL_dcov[6 * idx + 8]
     );
 
 
