@@ -245,7 +245,7 @@ __global__ void computeCov2DCUDA(int P,
 	if(dL_dcov[0] != 0) {
 		printf("%.3f\n", dL_dcov[0]);
 	}
-	if(mat_dL_dcov[0] != 0) {
+	if(mat_dL_dcov[0][0] != 0) {
 		printf("%.3f\n", mat_dL_dcov[0][0]);
 	}
 
