@@ -445,5 +445,5 @@ void CudaRasterizer::Rasterizer::backward(
 		dL_dsh,
 		dL_view,
 		(glm::vec3*)dL_dscale,
-		(glm::vec4*)dL_drot, dL_view), debug)
+		(glm::vec4*)dL_drot), debug)
 }
