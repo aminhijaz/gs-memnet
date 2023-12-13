@@ -207,7 +207,7 @@ __global__ void computeCov2DCUDA(int P,
 
 	if (denom2inv != 0)
 	{
-		printf("%.3f\n", "reached here");
+		printf("%s\n", "reached here");
 		// Gradients of loss w.r.t. entries of 2D covariance matrix,
 		// given gradients of loss w.r.t. conic matrix (inverse covariance matrix).
 		// e.g., dL / da = dL / d_conic_a * d_conic_a / d_a
