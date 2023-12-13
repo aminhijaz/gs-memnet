@@ -149,7 +149,7 @@ class _RasterizeGaussians(torch.autograd.Function):
                 raise ex
         else:
              grad_means2D, grad_colors_precomp, grad_opacities, grad_means3D, grad_cov3Ds_precomp, grad_sh, grad_scales, grad_rotations, grad_viewmatrix = _C.rasterize_gaussians_backward(*args)
-
+        print(grad_viewmatrix)
         grads = (
             grad_means3D,
             grad_means2D,
@@ -194,7 +194,7 @@ class GaussianRasterizer(nn.Module):
             
         return visible
 
-    def forward(self, means3D, means2D, opacities, view_matrix, shs = None, colors_precomp = None, scales = None, rotations = None, cov3D_precomp = None):
+    def forward(self, means3D, means2D, opacities, view_matrix= None ,shs = None, colors_precomp = None, scales = None, rotations = None, cov3D_precomp = None):
         
         raster_settings = self.raster_settings
 
