@@ -235,24 +235,27 @@ __global__ void computeCov2DCUDA(int P,
 			dL_dcov[6 * idx + i] = 0;
 	}
 	glm::mat3 dcov_dT = glm::transpose(Vrk) * T + glm::transpose(T) * glm::transpose(Vrk);
+	printf("%.3f\n", dcov_dT[0][0]);
+	printf("%.3f\n", dcov_dT[0][1]);
+
+
 	glm::mat3 mat_dL_dcov(
         dL_dcov[0], dL_dcov[1], dL_dcov[2],
         dL_dcov[3], dL_dcov[4], dL_dcov[5],
         dL_dcov[6], dL_dcov[7], dL_dcov[8]
     );
+	printf("%.3f\n", dL_dcov);
+	printf("%.3f\n", mat_dL_dcov[0][0]);
+
 
 	glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
 	glm::mat3 dT_dview = J;
+	printf("%.3f\n", dT_dview[0][0]);
+
 	glm::mat3 dL_dview = dL_dT * dT_dview;
 	
 	dL_view[0] = dL_dview[0][0];
-	printf("%.3f", dL_view[0]);
-	printf("%.3f", dL_dview[0]);
 	dL_view[1] = dL_dview[0][1];
-	printf("%.3f", dL_view[1]);
-	printf("%.3f", dL_dview[1]);
-
-
 	dL_view[2] = dL_dview[0][2];
 	dL_view[3] = dL_dview[1][0];
 	dL_view[4] = dL_dview[1][1];
