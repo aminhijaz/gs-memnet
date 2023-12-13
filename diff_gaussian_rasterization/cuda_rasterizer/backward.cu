@@ -226,6 +226,7 @@ __global__ void computeCov2DCUDA(int P,
 		dL_dcov[6 * idx + 2] = 2 * T[0][0] * T[0][2] * dL_da + (T[0][0] * T[1][2] + T[0][2] * T[1][0]) * dL_db + 2 * T[1][0] * T[1][2] * dL_dc;
 		dL_dcov[6 * idx + 4] = 2 * T[0][2] * T[0][1] * dL_da + (T[0][1] * T[1][2] + T[0][2] * T[1][1]) * dL_db + 2 * T[1][1] * T[1][2] * dL_dc;
 		glm::mat3 dcov_dT = glm::transpose(Vrk) * T + glm::transpose(T) * glm::transpose(Vrk);
+		glm::mat3 mat_dL_dcov = glm::make_mat3(dL_dcov);
 		glm::mat3 dL_dT = dL_dcov * dcov_dT; //chain rule
 		glm::mat3 dT_dview = J;
 		glm::mat3 dL_dview = dL_dT * dT_dview;
