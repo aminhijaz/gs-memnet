@@ -10,8 +10,9 @@
  */
 
 #include "backward.h"
+#include <iostream>
+
 #include "auxiliary.h"
-#include <stdio.h>
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
 namespace cg = cooperative_groups;
