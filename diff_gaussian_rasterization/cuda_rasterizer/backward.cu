@@ -281,11 +281,11 @@ __global__ void computeCov2DCUDA(int P,
 	
 	dL_view[0] = dL_dview[0][0];
 	if(dL_dview[0][0] != 0) {
-		printf("%s %.3f", "dL_dview", dl_view[0]);
+		printf("%s %.3f", "dL_dview", dL_view[0]);
 
 	}
 	if(dL_view[0] != 0) {
-		printf("%s %.3f", "dL_view", dl_view[0]);
+		printf("%s %.3f", "dL_view", dL_view[0]);
 	}
 	dL_view[1] = dL_dview[0][1];
 	if(dL_view[1] != 0) {
