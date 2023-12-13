@@ -55,7 +55,7 @@ class _RasterizeGaussians(torch.autograd.Function):
         cov3Ds_precomp,
         raster_settings,
     ):
-
+        print("reached")
         # Restructure arguments the way that the C++ lib expects them
         args = (
             raster_settings.bg, 
@@ -175,8 +175,6 @@ class GaussianRasterizer(nn.Module):
     def __init__(self, raster_settings):
         super().__init__()
         self.raster_settings = raster_settings
-        print("reached")
-
     def markVisible(self, positions):
         # Mark visible points (based on frustum culling for camera) with a boolean 
         with torch.no_grad():
