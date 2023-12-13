@@ -24,7 +24,7 @@ class MerfNet(nn.Module):
         self.pipeline = pipeline
         # optimize the camera translation
         self.camera_pos = nn.Parameter(
-            torch.from_numpy(self.camera.camera_center).to(device))
+            self.camera.camera_center).to(device)
         self.resmodel = resmodel.to(device)
         for param in self.resmodel.parameters():
             param.requires_grad = False
