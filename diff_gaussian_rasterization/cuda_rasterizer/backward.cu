@@ -277,8 +277,6 @@ __global__ void computeCov2DCUDA(int P,
 		printf("%s %.3f", "dT_dview", dT_dview[0][1]);
 	}
 
-
-
 	glm::mat3 dL_dview = dL_dT * dT_dview;
 	
 	dL_view[0] = dL_dview[0][0];
@@ -286,12 +284,12 @@ __global__ void computeCov2DCUDA(int P,
 		printf("%s %.3f", "dL_dview", dl_view[0]);
 
 	}
-	if(dl_view[0] != 0) {
+	if(dL_view[0] != 0) {
 		printf("%s %.3f", "dL_view", dl_view[0]);
 	}
 	dL_view[1] = dL_dview[0][1];
-	if(dl_view[1] != 0) {
-		printf("%s %.3f", "dl_view", dL_view[1])
+	if(dL_view[1] != 0) {
+		printf("%s %.3f", "dl_view", dL_view[1]);
 	}
 	dL_view[2] = dL_dview[0][2];
 	dL_view[3] = dL_dview[1][0];
