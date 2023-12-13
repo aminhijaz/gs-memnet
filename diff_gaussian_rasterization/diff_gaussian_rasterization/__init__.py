@@ -157,7 +157,7 @@ class _RasterizeGaussians(torch.autograd.Function):
             grad_viewmatrix,
             None,
         )
-
+        print(grad_viewmatrix)
         return grads
 
 class GaussianRasterizationSettings(NamedTuple):
