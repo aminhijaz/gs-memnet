@@ -234,19 +234,65 @@ __global__ void computeCov2DCUDA(int P,
 			dL_dcov[6 * idx + i] = 0;
 	}
 	glm::mat3 dcov_dT = glm::transpose(Vrk) * T + glm::transpose(T) * glm::transpose(Vrk);
+	if(dcov_dT[0][0] != 0) {
+		printf("%s %.3f", "dcov_dT", dcov_dT[0][0]);
+
+	}
+		if(dcov_dT[0][1] != 0) {
+		printf("%s %.3f", "dcov_dT", dcov_dT[0][1]);
+
+	}
+
 	glm::mat3 mat_dL_dcov(
         dL_dcov[6 * idx + 0], dL_dcov[6 * idx + 1], dL_dcov[6 * idx + 2],
         dL_dcov[6 * idx + 3], dL_dcov[6 * idx + 4], dL_dcov[6 * idx + 5],
-        dL_dcov[6 * idx + 6], dL_dcov[6 * idx + 7], dL_dcov[6 * idx + 8]
+        dL_dcov[6 * idx + 6], dL_dcov[6 * idx + 7], dL_dcov[6 * idx + 3]
     );
+
+	if(mat_dL_dcov[0][0] != 0) {
+		printf("%s %.3f", "mat_dL_dcov", mat_dL_dcov[0][0]);
+
+	}
+		if(mat_dL_dcov[0][1] != 0) {
+		printf("%s %.3f", "mat_dL_dcov", mat_dL_dcov[0][1]);
+
+	}
 
 
 	glm::mat3 dL_dT = mat_dL_dcov * dcov_dT; //chain rule
+	if(dL_dT[0][0] != 0) {
+		printf("%s %.3f", "dL_dT", dL_dT[0][0]);
+	}
+	if(dL_dT[0][1] != 0) {
+		printf("%s %.3f", "dL_dT", dL_dT[0][1]);
+	}
+
+
+
 	glm::mat3 dT_dview = J;
+	if(dT_dview[0][0] != 0) {
+		printf("%s %.3f", "dT_dview", dT_dview[0][0]);
+	}
+	if(dT_dview[0][1] != 0) {
+		printf("%s %.3f", "dT_dview", dT_dview[0][1]);
+	}
+
+
+
 	glm::mat3 dL_dview = dL_dT * dT_dview;
 	
 	dL_view[0] = dL_dview[0][0];
+	if(dL_dview[0][0] != 0) {
+		printf("%s %.3f", "dL_dview", dl_view[0]);
+
+	}
+	if(dl_view[0] != 0) {
+		printf("%s %.3f", "dL_view", dl_view[0]);
+	}
 	dL_view[1] = dL_dview[0][1];
+	if(dl_view[1] != 0) {
+		printf("%s %.3f", "dl_view", dL_view[1])
+	}
 	dL_view[2] = dL_dview[0][2];
 	dL_view[3] = dL_dview[1][0];
 	dL_view[4] = dL_dview[1][1];
