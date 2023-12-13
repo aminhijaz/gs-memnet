@@ -29,6 +29,7 @@ def rasterize_gaussians(
     cov3Ds_precomp,
     raster_settings,
 ):
+    print(raster_settings.view_matrix.require_grads)
     return _RasterizeGaussians.apply(
         means3D,
         means2D,

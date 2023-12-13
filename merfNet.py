@@ -32,8 +32,6 @@ class MerfNet(nn.Module):
         self.loss_fn = loss_fn
         self.rasterizer = GaussianRasterizer(raster_settings=None)
         self.rasterizer.eval()
-        for param in self.rasterizer.parameters():
-            param.requires_grad = False
 
 
 
