@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torchvision
 from torchvision import transforms
 from scene.cameras import Camera as GSCamera
-from diff_gaussian_rasterization.diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianRasterizer
+from diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianRasterizer
 from resmem import ResMem
 import math
 class MerfNet(nn.Module):
@@ -95,7 +95,7 @@ class MerfNet(nn.Module):
         shs = None
         colors_precomp = None
         shs = self.gaussians.get_features
-        rendered_image, _ = self.rasterizer(
+        rendered_image, _, _, _ = self.rasterizer(
             means3D = means3D,
             means2D = means2D,
             shs = shs,
