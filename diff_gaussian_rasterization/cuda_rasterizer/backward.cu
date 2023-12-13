@@ -10,11 +10,11 @@
  */
 
 #include "backward.h"
-#include <iostream>
-
 #include "auxiliary.h"
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
+#include <stdio.h>
+
 namespace cg = cooperative_groups;
 
 // Backward pass for conversion of spherical harmonics to RGB for
@@ -246,7 +246,13 @@ __global__ void computeCov2DCUDA(int P,
 	glm::mat3 dL_dview = dL_dT * dT_dview;
 	
 	dL_view[0] = dL_dview[0][0];
+	printf("%.3f", dL_view[0]);
+	printf("%.3f", dL_dview[0]);
 	dL_view[1] = dL_dview[0][1];
+	printf("%.3f", dL_view[1]);
+	printf("%.3f", dL_dview[1]);
+
+
 	dL_view[2] = dL_dview[0][2];
 	dL_view[3] = dL_dview[1][0];
 	dL_view[4] = dL_dview[1][1];
@@ -261,11 +267,6 @@ __global__ void computeCov2DCUDA(int P,
 	dL_view[13] = 0;
 	dL_view[14] = 0;
 	dL_view[15] = 0;
-	std::cout << dL_view[0] << std::endl;
-	std::cout << dL_view[1] << std::endl;
-	std::cout << dL_view[2] << std::endl;
-	std::cout << dL_view[3] << std::endl;
-
 
 
 
