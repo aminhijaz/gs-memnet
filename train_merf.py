@@ -38,7 +38,7 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     merf = MerfNet(gaussians, render_merf, single_camera[0], merf_eval_model, pipeline, background)
     merf.train()
 
-    optimizer = torch.optim.Adam([merf.camera_pos], lr=0.1)
+    optimizer = torch.optim.Adam([merf.camera_pos], lr=0.0001)
     loop = range(1000)
     for i in loop:
         optimizer.zero_grad()
