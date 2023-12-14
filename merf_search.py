@@ -9,7 +9,7 @@ from utils.general_utils import safe_state
 from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args
 from gaussian_renderer import GaussianModel
-from resmem.model import ResMem
+from resmem import ResMem
 from torchvision import transforms
 from scene.cameras import Camera, MiniCam
 import torch.nn.functional as F
