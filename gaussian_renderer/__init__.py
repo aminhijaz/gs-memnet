@@ -183,8 +183,8 @@ def render_RT(R, T,viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.
         opacities = opacity,
         scales = scales,
         rotations = rotations,
-        cov3D_precomp = cov3D_precomp
-        view_matrix)
+        cov3D_precomp = cov3D_precomp,
+        view_matrix = Rt)
 
     # Those Gaussians that were frustum culled or had a radius of 0 were not visible.
     # They will be excluded from value updates used in the splitting criteria.
