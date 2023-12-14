@@ -41,7 +41,7 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
     optimizer = torch.optim.AdamW([merf.camera_pos], lr=0.0001)
     best_render_image = render_merf(single_camera[0], gaussians)
     best_pred = 0
-    loop = range(1000)
+    loop = tqdm(range(1000))
     for i in loop:
         optimizer.zero_grad()
         loss, rendered_image, prediction = merf()
