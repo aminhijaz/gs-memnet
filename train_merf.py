@@ -11,7 +11,9 @@ from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args
 from gaussian_renderer import GaussianModel
 from resmem import ResMem
+from torchvision import transforms
 
+import numpy as np
 
 def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
     makedirs("merf_outputs", exist_ok=True)
@@ -29,27 +31,51 @@ def train_merf(dataset : ModelParams, iteration : int, pipeline : PipelineParams
         bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
 
-    def render_merf(R, T, viewpoint_camera, gaussians):
-      
-        rendering = render_RT(R,T,viewpoint_camera, gaussians, pipeline, background)["render"]
+    def render_merf(viewpoint_camera, gaussians):
+        rendering = render(viewpoint_camera, gaussians, pipeline, background)["render"]
         return rendering
 
     merf_eval_model = ResMem(pretrained=True)
     merf = MerfNet(gaussians, render_merf, single_camera[0], merf_eval_model, pipeline, background)
     merf.train()
-
-    optimizer = torch.optim.Adam([merf.camera_pos], lr=0.0001)
+    optimizer = torch.optim.AdamW([merf.camera_pos], lr=0.0001)
+    best_render_image = render_merf(single_camera[0], gaussians)
+    best_pred = 0
     loop = range(1000)
     for i in loop:
         optimizer.zero_grad()
-        loss, _ = merf()
+        loss, rendered_image, prediction = merf()
+        if(prediction > best_pred):
+            best_pred = prediction
+            best_render_image = rendered_image
         loss.backward(retain_graph=True)
         optimizer.step()
+    torchvision.utils.save_image(best_render_image, os.path.join("merf_outputs", "best_new_camera.png"))
+    print("rendering original cameras")
+    resmem = ResMem(pretrained=True)
+    resmem.eval()
+    transform = transforms.Compose((
+        transforms.Resize((256, 256)),
+    ))
+    original_scores =[]
+    for camera in all_cameras[:1]:
+        rendering = render(camera, gaussians, pipeline, background)["render"]
+        image = transform(rendering.unsqueeze(0))
+        score = resmem.forward(image.to("cuda")).cpu().item()
+        original_scores.append(score)
+    original_scores = np.array(original_scores)
+    best_original_idx = np.argmax(original_scores)
+    best_original_score = original_scores[best_original_idx]
+    best_original_camera = all_cameras[best_original_idx]
+    rendered = render_merf(best_original_camera, gaussians)
+    print("original score")
+    print(best_original_score)
+    torchvision.utils.save_image(best_render_image, os.path.join("merf_outputs", "best_orginal_camera.png"))
+    
+    
 
-        # if i % 100 == 0:
-        #     for g in optimizer.param_groups:
-        #         g['lr'] += 0.02
-        #     torchvision.utils.save_image(rendering, os.path.join("merf_outputs", '{0:05d}'.format(i) + ".png"))
+
+
 
 
 if __name__ == "__main__":
